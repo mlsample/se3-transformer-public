@@ -1,3 +1,10 @@
+import sys
+import os
+import warnings
+warnings.filterwarnings("ignore", message="Recommend creating graphs by `dgl.graph(data)` instead of `dgl.DGLGraph(data)`.")
+
+sys.path.append('/scratch/matthew/project_files/dnaOrigami/se3-transformer-public')
+sys.path.append('/scratch/matthew/project_files/dnaOrigami/e3')
 from utils.utils_profiling import *  # load before other local modules
 
 import argparse
@@ -164,7 +171,7 @@ def main(FLAGS, UNPARSED_ARGV):
     train_dataset = RIDataset(FLAGS, split='train')
     train_loader = DataLoader(train_dataset,
                               batch_size=FLAGS.batch_size,
-                              shuffle=True,
+                              shuffle=False,
                               collate_fn=collate,
                               num_workers=FLAGS.num_workers,
                               drop_last=True)
@@ -189,7 +196,8 @@ def main(FLAGS, UNPARSED_ARGV):
 
     FLAGS.train_size = len(train_dataset)
     FLAGS.test_size = len(test_dataset)
-    assert len(test_dataset) < len(train_dataset)
+    assert len(test_dataset) <= len(train_dataset)
+    print((len(train_dataset), len(test_dataset)))
 
     model = models.__dict__.get(FLAGS.model)(FLAGS.num_layers, FLAGS.num_channels, num_degrees=FLAGS.num_degrees,
                                              div=FLAGS.div, n_heads=FLAGS.head, si_m=FLAGS.simid, si_e=FLAGS.siend,
@@ -231,9 +239,9 @@ if __name__ == '__main__':
     wandb.save('*.txt')
 
     # Where the magic is
-    try:
-        main(FLAGS, UNPARSED_ARGV)
-    except Exception:
-        import pdb, traceback
-        traceback.print_exc()
-        pdb.post_mortem()
+    # try:
+    main(FLAGS, UNPARSED_ARGV)
+    # except Exception:
+        # import pdb, traceback
+        # traceback.print_exc()
+        # pdb.post_mortem()
